@@ -1,15 +1,10 @@
-require 'rake/testtask'
-require 'rubygems'
-require 'bundler/setup'
-
 task :start_ do
- sh "sudo rackup"
+ sh "bundle exec rackup"
 end
 
 file '.build' do
  cmd = "bash -c 'apt-get install -y zlib1g-dev && bundle install --deployment --binstubs'"
- sh "sudo docker run --rm=true -t -v `pwd`:/src -w /src ruby #{cmd}"
- #sh "sudo docker run --rm=true -t -v `pwd`:/src -w /src ruby bundle install"
+ sh "sudo docker run --rm=true -t -e BUNDLE_APP_CONFIG='.bundle' -v `pwd`:/src -w /src ruby #{cmd}"
  sh "sudo chown -R ${USER}. ."
  sh "touch .build"
 end
@@ -17,5 +12,5 @@ end
 task :build => ['.build']
 
 task :start => :build  do
- sh "sudo docker run -t -v `pwd`:/src -w /src ruby rake start_"
+    sh "sudo docker run -t -e BUNDLE_APP_CONFIG='.bundle' -p 8080:80 -v `pwd`:/src -w /src ruby rake start_"
 end
